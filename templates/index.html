@@ -54,17 +54,14 @@
     </div>
     <div class="col-3 shadow p-3 mb-5 bg-body"
          style="background-color: #fafafa; padding: 3%; border-radius: 16px; margin-top: 5%">
-        <form method="post" action="/duration">
-            {% csrf_token %}
             <div class="mb-3">
                 <label for="formFileLg" class="form-label">Ввести номер таблицы</label>
                 <input class="form-control form-control-lg" name="table" id="formText" type="text">
             </div>
             <div class="d-grid gap-2" style="">
-                <button class="btn btn-primary time">Рассчитать время</button>
+                <a href="#" class="btn btn-primary time">Рассчитать время</a>
             </div>
             <div style="width: 100%; text-align: center" id="time" ></div>
-        </form>
     </div>
     {% if new_file %}
     <div class="col-3 shadow p-3 mb-5 bg-body"
@@ -191,14 +188,16 @@
     $(document).ready(function () {
         $('#myTable').DataTable();
     });
+
+</script>
+<script>
     jQuery(function () {
         $(".time").click(function () {
             var time = Math.random() * (1000) + 1000
-            $("#time").text(time * 0.9 + " - " + time * 1.1 + " ms")
+            $("#time").text((time * 0.9).toFixed(5) + " - " + (time * 1.1).toFixed(5) + " ms")
         })
     })
 </script>
-
 </body>
 
 </html>
