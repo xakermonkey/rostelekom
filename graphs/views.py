@@ -112,11 +112,33 @@ def save_file(f):
 def index(request):
     if request.POST:
         save_file(request.FILES.get("file"))
-        table1, table2, new_csv, name = find_relevant(request.FILES.get("file").name)
-        return render(request, 'index.html', {"table1": table1, "table2": table2, "new_file": new_csv, "name": name})
+        df = pd.read_csv("codenrock/reformed_data_all.csv")
+        df[["count_all_into", "count_etl_into"]] = df[["count_all_into", "count_etl_into"]].apply(
+            lambda x: x + 1 if x.count_etl_into == 0 else x, axis=1)
+        q = df.count_dev_select.sum()
+        qq = df.count_etl_into.sum()
+        df["conv_etl"] = df.count_etl_into / qq
+        df["conv_dev"] = df.count_dev_select / q
+        df["relevant"] = df.conv_dev / df.conv_etl
+        df = df.fillna(0)
+        data = df.sort_values(by='relevant', ascending=False)
+        new_csv = data[data["relevant"] != 0]
+        new_csv["table"].to_csv(
+            "templates/static/" + ".".join(request.FILES.get("file").name.split(".")[:-1]) + "_new.csv")
+        return render(request, 'index.html', {
+            "table1": data[["table", "count_etl_into", "count_dev_select", "relevant"]].iloc[
+                      :100].values.tolist(),
+            "table2": data[["table", "count_etl_into", "count_dev_select",
+                            "relevant"]].iloc[-100:].values.tolist(),
+            "new_file": "static/" + ".".join(request.FILES.get("file").name.split(".")[:-1]) + "_new.csv",
+            "name": ".".join(request.FILES.get("file").name.split(".")[:-1]) + "_new.csv"})
     else:
         return render(request, 'index.html')
 
 
 def api(request):
     return render(request, 'api.html')
+
+
+def duration(request):
+    return render(request, 'index.html')

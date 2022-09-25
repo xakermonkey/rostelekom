@@ -52,9 +52,24 @@
             </div>
         </form>
     </div>
+    <div class="col-3 shadow p-3 mb-5 bg-body"
+         style="background-color: #fafafa; padding: 3%; border-radius: 16px; margin-top: 5%">
+        <form method="post" action="/duration">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="formFileLg" class="form-label">Ввести номер таблицы</label>
+                <input class="form-control form-control-lg" name="table" id="formText" type="text">
+            </div>
+            <div class="d-grid gap-2" style="">
+                <button class="btn btn-primary time">Рассчитать время</button>
+            </div>
+{#            <div style="width: 100%; text-align: center" id="time" >138.81105 - 169.65795 ms</div>#}
+        </form>
+    </div>
     {% if new_file %}
     <div class="col-3 shadow p-3 mb-5 bg-body"
          style="background-color: #fafafa; padding: 3%; border-radius: 16px; margin-top: 5%">
+        Новый файл
         <div>{{ name}}</div>
         <a class="btn btn-primary" href="{{ new_file }}">Скачать</a>
     </div>
@@ -74,8 +89,8 @@
                         <th>table</th>
                         <th>count into etl</th>
                         <th>count select dev</th>
-                        <th>conv etl</th>
-                        <th>cont dev</th>
+{#                        <th>conv etl</th>#}
+{#                        <th>cont dev</th>#}
                         <th>relevant</th>
                     </tr>
                     </thead>
@@ -102,8 +117,8 @@
                         <th>table</th>
                         <th>count into etl</th>
                         <th>count select dev</th>
-                        <th>conv etl</th>
-                        <th>cont dev</th>
+{#                        <th>conv etl</th>#}
+{#                        <th>cont dev</th>#}
                         <th>relevant</th>
                     </tr>
                     </thead>
