@@ -41,7 +41,8 @@
 
     <div class="col-3 shadow p-3 mb-5 bg-body"
          style="background-color: #fafafa; padding: 3%; border-radius: 16px; margin-top: 5%">
-        <form>            {% csrf_token %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
             <div class="mb-3">
                 <label for="formFileLg" class="form-label">Выбрать файл для анализа</label>
                 <input class="form-control form-control-lg" name="file" id="formFileLg" type="file">
@@ -51,6 +52,13 @@
             </div>
         </form>
     </div>
+    {% if new_file %}
+    <div class="col-3 shadow p-3 mb-5 bg-body"
+         style="background-color: #fafafa; padding: 3%; border-radius: 16px; margin-top: 5%">
+        <div>{{ name}}</div>
+        <a class="btn btn-primary" href="{{ new_file }}">Скачать</a>
+    </div>
+    {% endif %}
 
 
     <img class="load" src="{% static 'load.gif' %}" width="300" style="display: block">
@@ -63,13 +71,22 @@
                 <table id="myTable" class="table table-striped">
                     <thead style="vertical-align: middle">
                     <tr>
-                        <th>№</th>
                         <th>table</th>
                         <th>count into etl</th>
                         <th>count select dev</th>
+                        <th>conv etl</th>
+                        <th>cont dev</th>
+                        <th>relevant</th>
                     </tr>
                     </thead>
                     <tbody id="tbody" style="vertical-align: middle; ho-align: center">
+                    {% for row in table1 %}
+                        <tr>
+                        {% for i in row %}
+                            <th>{{ i }}</th>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -82,13 +99,22 @@
                 <table id="myTable" class="table table-striped">
                     <thead style="vertical-align: middle">
                     <tr>
-                        <th>№</th>
                         <th>table</th>
                         <th>count into etl</th>
                         <th>count select dev</th>
+                        <th>conv etl</th>
+                        <th>cont dev</th>
+                        <th>relevant</th>
                     </tr>
                     </thead>
                     <tbody id="tbody" style="vertical-align: middle; ho-align: center">
+                    {% for row in table2 %}
+                        <tr>
+                        {% for i in row %}
+                            <th>{{ i }}</th>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -150,189 +176,6 @@
     $(document).ready(function () {
         $('#myTable').DataTable();
     });
-</script>
-
-
-<script>
-    jQuery(function () {
-        var dt = null;
-        $('body').on('click', '.analysis', function () {
-            $('.load').show();
-            $('.analysis').prop("disabled", true);
-            setTimeout(function () {
-                $('.load').hide();
-                $('.datatable').show();
-            }, 2500);
-            var data = new FormData();
-            const files = $("#formFileLg")[0].files;
-            data.append('csrfmiddlewaretoken', $('input[name="csrfmiddlewaretoken"]').val());
-            data.append("data_string", $('#data_string').val());
-            if (files.length > 0) {
-                data.append("file", files[0]);
-            }
-            $.ajax({
-                url: '/analysis',
-                method: 'POST',
-                data: data,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    if (data.class) {
-                        $("#tbody").append(`<tr>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td >${data.class}
-
-                    </td>
-                    <td >0
-
-                    </td>
-                    <td >0
-
-                    </td>
-                    <td>${data.class}</td>
-                </tr>`)
-                    } else {
-                        dt = JSON.parse(data.data);
-                        for (let i = 0; i < dt.id.length; i++) {
-                            $("#tbody").append(`<tr>
-                    <td>${dt.id[i][0]}</td>
-                    <td>${dt.id[i][1]}</td>
-                    <td>${dt.id[i][3]}</td>
-                    <td >${dt.id[i][2] === "1" ? dt.result[i] : "0"}
-                        <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary md" data-index="${i}" data-value="1" style="margin-left: 30px"><i class="bi bi-graph-up "></i>
-                        </button>
-                    </td>
-                    <td >${dt.id[i][2] === "2" ? dt.result[i] : "0"}
-                        <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary md" data-index="${i}" data-value="2" style="margin-left: 30px"><i class="bi bi-graph-up "></i>
-                        </button>
-                    </td>
-                    <td >${dt.id[i][2] === "3" ? dt.result[i] : "0"}
-                        <button data-bs-toggle="modal"  data-bs-target="#exampleModal" class="btn btn-primary md" data-index="${i}" data-value="3" style="margin-left: 30px"><i class="bi bi-graph-up "></i>
-                        </button>
-                    </td>
-                    <td>${parseInt(dt.id[i][2] === "1" ? dt.result[i] : "0") + parseInt(dt.id[i][2] === "2" ? dt.result[i] : "0") + parseInt(dt.id[i][2] === "3" ? dt.result[i] : "0")}</td>
-                </tr>`)
-                        }
-                    }
-                }
-            })
-        })
-        $("body").on("click", ".md", function () {
-            $("#exampleModalLabel").text(`Графики ${$(this).data("value")} повтора`)
-            var ind = $(this).data("index");
-            console.log(dt);
-            var repert = dt.id.filter(function (obj) {
-                var etalon = dt.id[ind]
-                return etalon[0] === obj[0] && etalon[1] === obj[1] && etalon[2] === obj[2]
-            })
-            for (let i = 0; i < repert.length; i++) {
-                var ind = dt.id.indexOf(repert[i])
-                var ppg = dt.x1[ind]
-                var hpg = dt.x2[ind]
-                $("#ppg").append(`<div class="graph" style="height: 100%; width: 220px">
-                                <div style="display: flex;align-items: center;justify-content: space-between;">
-                                    <h6>ID вопроса: ${repert[i][3]}</h6>
-                                    <input type="number" class="form-control" value="1" min="0" max="2"
-                                           style="width: 60px; margin-right: 3%" id="mark${repert[i][3]}"></div>
-                                <canvas id="photoChart${repert[i][3]}" width=50" height="50"></canvas>
-                            </div>`)
-                const ctx = document.getElementById('photoChart' + repert[i][3]).getContext('2d');
-                const photoChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: Array(240).fill().map((e, i) => i + 1),
-                        datasets: [{
-                            label: 'Фотоплетизмограмма',
-                            data: ppg,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            radius: 0,
-                            borderWidth: 1,
-                            tension: 0.3
-                        }]
-                    },
-
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        },
-                    }
-                });
-                $('#hpg').append(`<div class="graph" style="height: 100%; width: 220px">
-                                <canvas id="piezoChart${repert[i][3]}" width=50" height="50"></canvas>
-                            </div>`)
-                const pctx = document.getElementById('piezoChart' + repert[i][3]).getContext('2d');
-                const piezoChart = new Chart(pctx, {
-                    type: 'line',
-                    data: {
-                        labels: Array(240).fill().map((e, i) => i + 1),
-                        datasets: [{
-                            label: 'Пьезоплетизмограмма',
-                            data: hpg,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(65,12,12, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            radius: 0,
-                            borderWidth: 1,
-                            tension: 0.3
-                        }]
-                    },
-
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        },
-                    }
-                });
-            }
-        })
-        $(".close").click(function () {
-            $("graph").remove();
-        })
-        $("#formFileLg").change(function () {
-            if ($(this).val() !== "") {
-                $('#data_string').val("");
-                $('#data_string').attr("disabled", "disabled")
-            } else {
-                $('#data_string').removeAttr("disabled")
-            }
-        })
-    })
-
-
 </script>
 
 </body>
