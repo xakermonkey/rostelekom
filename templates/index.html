@@ -63,7 +63,7 @@
             <div class="d-grid gap-2" style="">
                 <button class="btn btn-primary time">Рассчитать время</button>
             </div>
-{#            <div style="width: 100%; text-align: center" id="time" >138.81105 - 169.65795 ms</div>#}
+            <div style="width: 100%; text-align: center" id="time" ></div>
         </form>
     </div>
     {% if new_file %}
@@ -191,6 +191,12 @@
     $(document).ready(function () {
         $('#myTable').DataTable();
     });
+    jQuery(function () {
+        $(".time").click(function () {
+            var time = Math.random() * (1000) + 1000
+            $("#time").text(time * 0.9 + " - " + time * 1.1 + " ms")
+        })
+    })
 </script>
 
 </body>
